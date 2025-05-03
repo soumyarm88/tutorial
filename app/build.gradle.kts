@@ -8,11 +8,17 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    // Apply the maven publish plugin
+    id("maven-publish")
+
+    id("java")
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -40,4 +46,36 @@ application {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+tasks.register<Copy>("copyTask") {
+    from("source")
+    into("target")
+    include("*.war")
+}
+
+tasks.register("hello") {
+    doLast {
+        println("Hello!")
+    }
+}
+
+tasks.register("greet") {
+    doLast {
+        println("How are you?")
+    }
+    dependsOn("hello")
+}
+
+// https://docs.gradle.org/current/userguide/part4_gradle_plugins.html#part4_begin
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.gradle.tutorial"
+            artifactId = "tutorial"
+            version = "1.0"
+
+            from(components["java"])
+        }
+    }
 }
